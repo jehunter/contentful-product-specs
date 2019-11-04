@@ -1,0 +1,6 @@
+{
+    "name": "Product Specs",
+    "id": "contentful-ui-product-specs",
+    "fieldTypes": ["Object"],
+    "srcdoc": "./index.html"
+}

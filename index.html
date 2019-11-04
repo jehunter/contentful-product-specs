@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Contentful UI-Extension Product Specs</title>
+        <link rel="stylesheet" href="https://contentful.github.io/ui-extensions-sdk/cf-extension.css">
+        <link rel="dns-prefetch preconnect" href="https://cdn11.bigcommerce.com" crossorigin>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+
+            button.f36-button {
+                height: 2.5rem;
+                display: inline-block;
+                padding: 0 1rem;
+                color: #536171;
+                line-height: 2;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                border: .0625rem solid #c3cfd5;
+                border-radius: .125rem;
+                font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
+                font-size: .875rem;
+                overflow: hidden;
+                -webkit-transition: background-color .2s ease-in-out,opacity .2s ease-in-out,border-color .2s ease-in-out;
+                transition: background .2s ease-in-out,opacity .2s ease-in-out,border-color .2s ease-in-out;
+                vertical-align: middle;
+                text-decoration: none;
+                cursor: pointer;
+                outline: none;
+            }
+
+            button.f36-button.color-default {
+                background: #e5ebed;
+            }
+
+            button.f36-button.color-default:hover {
+                background: #d3dce0;
+            }
+
+            button.f36-button.color-positive,
+            button.f36-button.color-negative {
+                color: #f7f9fa;
+            }
+
+            button.f36-button.color-positive {
+                border-color: #0baa75;
+                background-image: -webkit-gradient(linear,left bottom,left top,from(#0eb87f),to(#14d997));
+                background-image: linear-gradient(0deg,#0eb87f,#14d997);
+                background-size: 100% 200%;
+            }
+
+            button.f36-button.color-positive:hover {
+                background-position: 0 100%;
+            }
+
+            button.f36-button.color-negative {
+                border-color: #cd3f39;
+                background-image: -webkit-gradient(linear,left bottom,left top,from(#d9453f),to(#f05751));
+                background-image: linear-gradient(0deg,#d9453f,#f05751);
+                background-size: 100% 200%;
+            }
+
+            button.f36-button.color-negative:hover {
+                background-position: 0 100%;
+            }
+
+            .glow-positive {
+                box-shadow: 0px 0px 7px #0eb87f;
+            }
+
+            .d-none {
+                display: none !important;
+            }
+
+            .text-center {
+                text-align: center;
+            }
+
+            .text-uppercase {
+                text-transform: uppercase;
+            }
+
+            .alert-danger {
+                background-color: #d9453f;
+                padding: .875rem;
+                color: #f7f9fa;
+            }
+        </style>
+        <script src="https://unpkg.com/contentful-ui-extensions-sdk@3"></script>
+    </head>
+    <body id="product_spec_extension">
+   		<div>
+              	<!-- Loading message or spinner -->
+                <div id="error_message" class="alert alert-danger d-none" role="alert"></div>
+
+                <div>
+                    <form id="product_spec_form">
+                        <label for="spec_label">Label</label>
+                        <input id="spec_label" type="text" name="spec_label" required>
+                        <label for="spec_value">Value</label>
+                        <input id="spec_value" type="text" name="spec_value" required>
+                        <button type="submit" class="f36-button color-positive">Add Spec</button>
+                    </form>
+                </div>
+
+                <!-- Main product spec listing element, to be filled out with product spec data -->
+                <div>
+                    <ul id="product_spec_listing">
+
+                    </ul>
+                </div>
+        </div>
+        <script>
+            window.contentfulExtension.init( extension => {
+                // Size iframe
+                extension.window.startAutoResizer();
+
+                // Set initial value
+                const fieldValue = extension.field.getValue();
+                let specObj = { spec_items: [] };
+
+                function createSpecItem(specItemObj) {
+                    let itemElem = document.createElement('li');
+                        itemElem.innerHTML = `<span>${specItemObj.label}: ${specItemObj.value}</span><button type=button class="f36-button color-negative" onclick="deleteSpecItem(this)">Remove Spec</button>`;
+
+                    document.getElementById('product_spec_listing').appendChild(itemElem);
+                }
+
+                function deleteSpecItem(itemElem) {
+                    document.getElementById('product_spec_listing').removeChild(itemElem);
+                }
+
+                document.forms['product_spec_form'].addEventListener('submit', function formHandler(e) {
+                    e.preventDefault();
+
+                    let specItem = {
+                        label: document.forms['product_spec_form']['spec_label'].value,
+                        value: document.forms['product_spec_form']['spec_value'].value
+                    };
+
+                    specObj.spec_items.push(specItem);
+                    createSpecItem(specItem);
+                    extension.field.setValue(specObj);
+                });
+
+                if (typeof fieldValue != 'undefined' && fieldValue.spec_items.length > 0) {
+                    specObj = fieldValue;
+                }
+        </script>
+    </body>
+</html>
