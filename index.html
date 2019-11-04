@@ -10,6 +10,11 @@
                 box-sizing: border-box;
             }
 
+            button[disabled] {
+                opacity: 0.7;
+                cursor: default !important;
+            }
+
             button.f36-button {
                 height: 2.5rem;
                 display: inline-block;
@@ -67,6 +72,49 @@
                 background-position: 0 100%;
             }
 
+            form label {
+                font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
+                font-size: .875rem;
+                line-height: 1.5;
+                display: inline-block;
+                color: #2a3039;
+                font-weight: 600;
+                margin-bottom: .5rem;
+            }
+
+            form input {
+                outline: none;
+                background-color: #fff;
+                border: 1px solid #d3dce0;
+                max-height: 2.5rem;
+                color: #536171;
+                font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
+                font-size: .875rem;
+                padding: .65625rem;
+                margin: 0 0 12px;
+                width: 100%;
+                -webkit-appearance: textfield;
+            }
+
+            ul {
+                list-style: none;
+                padding: 0;
+            }
+
+            ul li {
+                border-bottom: 1px solid #e5ebed;
+                color: #536171;
+                font-size: .875rem;
+                font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
+                font-weight: 400;
+                line-height: 1.5;
+                padding: .9375rem 1.25rem;
+                vertical-align: top;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
             .glow-positive {
                 box-shadow: 0px 0px 7px #0eb87f;
             }
@@ -105,7 +153,7 @@
                         <button type="submit" class="f36-button color-positive">Add Spec</button>
                     </form>
                 </div>
-
+                <hr>
                 <!-- Main product spec listing element, to be filled out with product spec data -->
                 <div>
                     <ul id="product_spec_listing">
@@ -124,17 +172,45 @@
 
                 function createSpecItem(specItemObj) {
                     let itemElem = document.createElement('li');
-                        itemElem.innerHTML = `<span>${specItemObj.label}: ${specItemObj.value}</span><button type=button class="f36-button color-negative" onclick="deleteSpecItem(this)">Remove Spec</button>`;
+                    itemElem.innerHTML = `<span>${specItemObj.label}: ${specItemObj.value}</span><button type=button class="f36-button color-negative">Remove</button>`;
+                    itemElem.setAttribute('data-index', document.querySelectorAll('#product_spec_listing > li').length);
 
                     document.getElementById('product_spec_listing').appendChild(itemElem);
+                    itemElem.querySelector('button.color-negative').addEventListener('click', deleteSpecItem);
                 }
 
-                function deleteSpecItem(itemElem) {
-                    document.getElementById('product_spec_listing').removeChild(itemElem);
+                function renderSpecItems() {
+                    if(specObj.spec_items.length > 0) {
+                        for(let i = 0; i < specObj.spec_items.length; i++) {
+                            createSpecItem(specObj.spec_items[i], false);
+                        }
+                    }
+                }
+
+                function deleteSpecItem(e) {
+                    let buttons = document.querySelectorAll('button');
+                    for(let i = 0; i < buttons.length; i++) {
+                        buttons[i].setAttribute('disabled', '');
+                    }
+
+                  	specObj.spec_items.splice(parseInt(e.path[1].getAttribute('data-index')), 1);
+                  	document.getElementById('product_spec_listing').removeChild(e.path[1]);
+                    extension.field.setValue(specObj);
+
+                    setTimeout(function() {
+                        for(let i = 0; i < buttons.length; i++) {
+                            buttons[i].removeAttribute('disabled');
+                        }
+                    }, 2000);
                 }
 
                 document.forms['product_spec_form'].addEventListener('submit', function formHandler(e) {
                     e.preventDefault();
+
+                    let buttons = document.querySelectorAll('button');
+                    for(let i = 0; i < buttons.length; i++) {
+                        buttons[i].setAttribute('disabled', '');
+                    }
 
                     let specItem = {
                         label: document.forms['product_spec_form']['spec_label'].value,
@@ -144,11 +220,21 @@
                     specObj.spec_items.push(specItem);
                     createSpecItem(specItem);
                     extension.field.setValue(specObj);
+
+                    document.forms['product_spec_form'].reset;
+
+                    setTimeout(function() {
+                        for(let i = 0; i < buttons.length; i++) {
+                            buttons[i].removeAttribute('disabled');
+                        }
+                    }, 2000);
                 });
 
                 if (typeof fieldValue != 'undefined' && fieldValue.spec_items.length > 0) {
                     specObj = fieldValue;
+                    renderSpecItems();
                 }
+            });
         </script>
     </body>
 </html>
