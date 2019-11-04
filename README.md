@@ -1,0 +1,1 @@
+# contentful-product-specs
