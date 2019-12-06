@@ -15,6 +15,10 @@
                 cursor: default !important;
             }
 
+            button + button {
+                margin-left: 5px;
+            }
+
             button.f36-button {
                 height: 2.5rem;
                 display: inline-block;
@@ -82,7 +86,8 @@
                 margin-bottom: .5rem;
             }
 
-            form input {
+            form input,
+            form select {
                 outline: none;
                 background-color: #fff;
                 border: 1px solid #d3dce0;
@@ -93,7 +98,6 @@
                 padding: .65625rem;
                 margin: 0 0 12px;
                 width: 100%;
-                -webkit-appearance: textfield;
             }
 
             ul {
@@ -146,11 +150,23 @@
 
                 <div>
                     <form id="product_spec_form">
+                        <input id="index" type="hidden" name="index" value="">
                         <label for="spec_label">Label</label>
                         <input id="spec_label" type="text" name="spec_label" required>
                         <label for="spec_value">Value</label>
                         <input id="spec_value" type="text" name="spec_value" required>
-                        <button type="submit" class="f36-button color-positive">Add Spec</button>
+                        <label for="is_measured">Is this a measured specification?</label>
+                        <select id="is_measured" type="text" name="is_measured" required>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                        <label for="spec_uom">Unit of Measure</label>
+                        <select id="spec_uom" type="text" name="spec_uom">
+                            <option value="">SELECT</option>
+                            <option value="dimension">Dimension (inches)</option>
+                            <option value="weight">Weight (oz)</option>
+                        </select>
+                        <button type="submit" name="submit" class="f36-button color-positive">Add Spec</button>
                     </form>
                 </div>
                 <hr>
@@ -172,17 +188,18 @@
 
                 function createSpecItem(specItemObj) {
                     let itemElem = document.createElement('li');
-                    itemElem.innerHTML = `<span>${specItemObj.label}: ${specItemObj.value}</span><button type=button class="f36-button color-negative">Remove</button>`;
+                    itemElem.innerHTML = `<span><strong>${specItemObj.label}:</strong> ${specItemObj.value}</span><div><button type=button class="f36-button edit" data-index="${index}">Edit</button><button type=button class="f36-button color-negative">Remove</button></div>`;
                     itemElem.setAttribute('data-index', document.querySelectorAll('#product_spec_listing > li').length);
 
                     document.getElementById('product_spec_listing').appendChild(itemElem);
                     itemElem.querySelector('button.color-negative').addEventListener('click', deleteSpecItem);
+                    itemElem.querySelector('button.edit').addEventListener('click', editSpecItem);
                 }
 
                 function renderSpecItems() {
                     if(specObj.spec_items.length > 0) {
                         for(let i = 0; i < specObj.spec_items.length; i++) {
-                            createSpecItem(specObj.spec_items[i], false);
+                            createSpecItem(specObj.spec_items[i], i);
                         }
                     }
                 }
@@ -193,15 +210,69 @@
                         buttons[i].setAttribute('disabled', '');
                     }
 
-                  	specObj.spec_items.splice(parseInt(e.path[1].getAttribute('data-index')), 1);
-                  	document.getElementById('product_spec_listing').removeChild(e.path[1]);
-                    extension.field.setValue(specObj);
+                    let itemNode = null;
 
-                    setTimeout(function() {
-                        for(let i = 0; i < buttons.length; i++) {
-                            buttons[i].removeAttribute('disabled');
+                    for(let i = 0; i < e.path.length; i++) {
+                        if(e.path[i].tagName == 'li' || e.path[i].tagName == 'LI') {
+                            itemNode = e.path[i];
+                            break;
                         }
-                    }, 2000);
+                    }
+
+                    if(itemNode != null) {
+                      	specObj.spec_items.splice(parseInt(itemNode.getAttribute('data-index')), 1);
+                      	document.getElementById('product_spec_listing').removeChild(itemNode);
+                        extension.field.setValue(specObj);
+
+                        setTimeout(function() {
+                            for(let i = 0; i < buttons.length; i++) {
+                                buttons[i].removeAttribute('disabled');
+                            }
+                        }, 2000);
+                    }
+                }
+
+                function editSpecItem(e) {
+                    let specItemIndex = null;
+                    for(let i = 0; i < e.path.length; i++) {
+                        if(e.path[i].tagName == 'li' || e.path[i].tagName == 'LI') {
+                            specItemIndex = e.path[i].getAttribute('data-index');
+                            break;
+                        }
+                    }
+
+                    if(specItemIndex != null) {
+                        let specItem = specObj.spec_items[specItemIndex];
+
+                        document.forms['product_spec_form']['index'].value = specItemIndex;
+
+                        if(typeof specItem.label != 'undefined') {
+                            document.forms['product_spec_form']['spec_label'].value = specItem.label;
+                        }
+                        if(typeof specItem.value != 'undefined') {
+                            document.forms['product_spec_form']['spec_value'].value = specItem.value;
+                        }
+
+                        if(typeof specItem.is_measured != 'undefined') {
+                            document.forms['product_spec_form']['is_measured'].value = specItem.is_measured;
+                        }
+
+                        if(typeof specItem.uom != 'undefined') {
+                            document.forms['product_spec_form']['spec_uom'].value = specItem.uom;
+                        }
+
+                        document.forms['product_spec_form']['spec_label'].textContent = 'Update Spec';
+                        document.forms['product_spec_form']['spec_label'].focus();
+                    }
+                }
+
+                function updateSpecItem(i, specItemObj) {
+                    if(document.querySelector(`product_spec_listing li[data-index="${i}"]`) != null){
+                        let itemElem = document.querySelector(`product_spec_listing li[data-index="${i}"]`);
+                        itemElem.innerHTML = `<span><strong>${specItemObj.label}:</strong> ${specItemObj.value}</span><div><button type=button class="f36-button edit" data-index="${index}">Edit</button><button type=button class="f36-button color-negative">Remove</button></div>`;
+                        itemElem.querySelector('button.color-negative').addEventListener('click', deleteSpecItem);
+                        itemElem.querySelector('button.edit').addEventListener('click', editSpecItem);
+                    }
                 }
 
                 document.forms['product_spec_form'].addEventListener('submit', function formHandler(e) {
@@ -214,13 +285,22 @@
 
                     let specItem = {
                         label: document.forms['product_spec_form']['spec_label'].value,
-                        value: document.forms['product_spec_form']['spec_value'].value
+                        value: document.forms['product_spec_form']['spec_value'].value,
+                        is_measured: document.forms['product_spec_form']['is_measured'].value,
+                        uom: document.forms['product_spec_form']['spec_uom'].value
                     };
 
-                    specObj.spec_items.push(specItem);
-                    createSpecItem(specItem);
+                    if(document.forms['product_spec_form']['index'].value != '') {
+                        specObj.spec_items[document.forms['product_spec_form']['index'].value] = specItem;
+                        updateSpecItem(document.forms['product_spec_form']['index'].value, specItem);
+                    } else {
+                        specObj.spec_items.push(specItem);
+                        createSpecItem(specItem);
+                    }
+
                     extension.field.setValue(specObj);
 
+                    document.forms['product_spec_form']['spec_label'].textContent = 'Update Spec';
                     document.forms['product_spec_form'].reset();
 
                     setTimeout(function() {
