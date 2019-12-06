@@ -233,6 +233,8 @@
                 }
 
                 function editSpecItem(e) {
+                    document.forms['product_spec_form'].reset();
+
                     let specItemIndex = null;
                     for(let i = 0; i < e.path.length; i++) {
                         if(e.path[i].tagName == 'li' || e.path[i].tagName == 'LI') {
@@ -261,7 +263,7 @@
                             document.forms['product_spec_form']['spec_uom'].value = specItem.uom;
                         }
 
-                        document.forms['product_spec_form']['spec_label'].textContent = 'Update Spec';
+                        document.forms['product_spec_form']['submit'].textContent = 'Update Spec';
                         document.forms['product_spec_form']['spec_label'].focus();
                     }
                 }
@@ -300,7 +302,7 @@
 
                     extension.field.setValue(specObj);
 
-                    document.forms['product_spec_form']['spec_label'].textContent = 'Update Spec';
+                    document.forms['product_spec_form']['submit'].textContent = 'Add Spec';
                     document.forms['product_spec_form'].reset();
 
                     setTimeout(function() {
