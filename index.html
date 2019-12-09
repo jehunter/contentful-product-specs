@@ -188,7 +188,7 @@
 
                 function createSpecItem(specItemObj) {
                     let itemElem = document.createElement('li');
-                    itemElem.innerHTML = `<span><strong>${specItemObj.label}:</strong> ${specItemObj.value}</span><div><button type=button class="f36-button edit" data-index="${index}">Edit</button><button type=button class="f36-button color-negative">Remove</button></div>`;
+                    itemElem.innerHTML = `<span><strong>${specItemObj.label}:</strong> ${specItemObj.value}</span><div><button type=button class="f36-button edit">Edit</button><button type=button class="f36-button color-negative">Remove</button></div>`;
                     itemElem.setAttribute('data-index', document.querySelectorAll('#product_spec_listing > li').length);
 
                     document.getElementById('product_spec_listing').appendChild(itemElem);
@@ -269,9 +269,9 @@
                 }
 
                 function updateSpecItem(i, specItemObj) {
-                    if(document.querySelector(`product_spec_listing li[data-index="${i}"]`) != null){
-                        let itemElem = document.querySelector(`product_spec_listing li[data-index="${i}"]`);
-                        itemElem.innerHTML = `<span><strong>${specItemObj.label}:</strong> ${specItemObj.value}</span><div><button type=button class="f36-button edit" data-index="${index}">Edit</button><button type=button class="f36-button color-negative">Remove</button></div>`;
+                    if(document.querySelector(`#product_spec_listing li[data-index="${i}"]`) != null){
+                        let itemElem = document.querySelector(`#product_spec_listing li[data-index="${i}"]`);
+                        itemElem.innerHTML = `<span><strong>${specItemObj.label}:</strong> ${specItemObj.value}</span><div><button type=button class="f36-button edit">Edit</button><button type=button class="f36-button color-negative">Remove</button></div>`;
                         itemElem.querySelector('button.color-negative').addEventListener('click', deleteSpecItem);
                         itemElem.querySelector('button.edit').addEventListener('click', editSpecItem);
                     }
